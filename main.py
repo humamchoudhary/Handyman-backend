@@ -1,5 +1,7 @@
-from flask import Flask, jsonify, request
+from pprint import pprint
+from flask import Flask, jsonify, request,make_response
 import json
+from Catalog import Catalog, Product
 from Login import Login
 from SignUp import Signup
 
@@ -30,11 +32,11 @@ def LoginRoute():
             username = login.account.username
             email = login.account.email
             response = jsonify({"error":"Logged in","account":{"email":email,"username":username}})
-            return response
+            return make_response(response,200)
         except Exception as e:
             
             response = jsonify({"error":str(e),"account":'None'})
-            return response
+            return make_response(response,400)
     else:
         return response
     #checking the request type we get from the app
@@ -57,7 +59,7 @@ def SignUpRoute():
         username = request_data["username"]
         password = request_data["password"]
         gender = request_data["gender"]
-        email = request_data["email"]
+        email = request_data["email"]       
         name = request_data["name"]
         address = request_data["address"]
         try:
@@ -65,13 +67,41 @@ def SignUpRoute():
             response = jsonify({"error":"None"})
             print(response.data)
             signup.Print_Account_Details()
-            return response
+            return make_response(response,200)
         except Exception as e:
             response = jsonify({"error":str(e)})
-            return response
+            return make_response(response,400)
     else:
 
         return response
+
+@app.route('/products/new',methods =['POST'])
+def ProductsAdd():
+    request_data = request.data
+    request_data = json.loads(request_data.decode('utf-8'))
+    name = request_data["name"]
+    price = request_data["price"]
+    amount = request_data["amount"]
+    tags = request_data["tags"]
+    image = request_data["image"]
+    Catalog().Add(Product(name,amount,price,image,tags))
+    return make_response(None,200)
+        
+    
+@app.route('/product/search',methods=["GET",'POST'])
+def Productsearch():
+    if request.method=="POST":
+        request_data = request.data
+        request_data = json.loads(request_data.decode('utf-8'))
+
+@app.route('/products',methods=["GET"])
+def ProductView():
+    data = Catalog().Show()
+    response = jsonify({"products":data})
+    return response
+
+    
+
 
 
 if __name__ == "__main__":
