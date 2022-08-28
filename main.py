@@ -1,15 +1,19 @@
 from pprint import pprint
-from flask import Flask, jsonify, request,make_response
+from flask import Flask, jsonify, request,make_response,redirect,send_file
 import json
 from Catalog import Catalog, Product
 from Login import Login
 from SignUp import Signup
+import os
+
+from account import accountdetails
 
 #declared an empty variable for reassignment
 response = ''
 
 #creating the instance of our flask application
 app = Flask(__name__)
+app.config["IMAGE_UPLOADS"]="images"
 @app.route('/')
 def Test():
     return "<H1>Hello</H1>"
@@ -31,7 +35,9 @@ def LoginRoute():
             login = Login(username,password)
             username = login.account.username
             email = login.account.email
-            response = jsonify({"error":"Logged in","account":{"email":email,"username":username}})
+            img = login.account.img
+            ph = login.account.ph
+            response = jsonify({"error":"Logged in","account":{"email":email,"username":username,"image":img,"phone_num":ph}})
             return make_response(response,200)
         except Exception as e:
             
@@ -62,8 +68,9 @@ def SignUpRoute():
         email = request_data["email"]       
         name = request_data["name"]
         address = request_data["address"]
+        ph = request_data["phone_num"]
         try:
-            signup = Signup(name,address,gender,email,username,password,acc_type="Member")
+            signup = Signup(name,address,gender,email,username,password,acc_type="Member",phone_num=ph)
             response = jsonify({"error":"None"})
             print(response.data)
             signup.Print_Account_Details()
@@ -75,6 +82,27 @@ def SignUpRoute():
 
         return response
 
+@app.route('/getimages')
+def get_image():
+    img = request.args.get('img')
+    filename = f"D:\PythonPrograms\HandyManApp\Flutter\Backend\images/{img}"
+    return send_file(filename, mimetype='image/gif')
+    
+@app.route('/account',methods=["POST"])
+def accountload():
+    request_data = request.data
+    request_data = json.loads(request_data.decode('utf-8'))
+    name = request_data["username"]
+    response = jsonify(accountdetails(name)[0])
+    return response
+@app.route("/images",methods=["GET","POST"])
+def upload_file():
+    username = request.args.get("username")
+    image = request.files['image']
+    image.save(os.path.join(app.config["IMAGE_UPLOADS"],image.filename))
+    print("saved")    
+
+    return make_response({"hello":"lol"},200)
 @app.route('/products/new',methods =['POST'])
 def ProductsAdd():
     request_data = request.data

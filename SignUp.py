@@ -16,14 +16,15 @@ class Person(ABC):
 
 
 class Account(Person):
-    def __init__(self, name, gender, address, email, username, password, acc_type):
+    def __init__(self, name, gender, address, email, username, password,acc_type,img,phone_number):
         self.owner = super().__init__(name, gender)
         self.email = email
         self.username = username
         self.address = address
         self.password = password
         self.account_type = acc_type
-
+        self.img = img
+        self.ph = phone_number
     def GenToken(self):
         uuid_str = uuid.uuid1().urn
         self.__token = uuid_str[9:]
@@ -55,7 +56,7 @@ class Encrypt_Data:
 class Signup:
     DB = TinyDB("database.json")
     User = Query()
-    def __init__(self,name, address, gender, email, username, password, acc_type) -> None:
+    def __init__(self,name, address, gender, email, username, password, acc_type,phone_num,img="test.jpg") -> None:
         self.name = name
         self.address = address
         self.gender = gender
@@ -63,6 +64,8 @@ class Signup:
         self.username = username
         self.password = password
         self.acc_type = acc_type
+        self.img = img
+        self.ph = phone_num
         self.Regester()
 
     def Regester(self):
@@ -76,7 +79,7 @@ class Signup:
         hash = hashlib.sha256(self.password)
         self.hashpass = hash.hexdigest()
         account = Account(self.name, self.gender,
-                                       self.address, self.email, self.username, self.hashpass, self.acc_type)
+                                       self.address, self.email, self.username, self.hashpass, self.acc_type,self.img,self.ph)
         # if acc_type == "Savings":
             
         #     account = Savings_Account(f_name, m_name, l_name, gender,
@@ -96,8 +99,11 @@ class Signup:
             pickle.dump(encrypt, enc_file, None)
 
         accounts["username"] = self.username
+        accounts["name"] = self.name
         accounts["token"] = token
         accounts["email"] = self.email
+        accounts["img"] = self.img
+        accounts["ph_num"] = self.ph
         self.DB.insert(accounts)
 
     def Print_Account_Details(self):
