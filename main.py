@@ -85,7 +85,7 @@ def SignUpRoute():
 @app.route('/getimages')
 def get_image():
     img = request.args.get('img')
-    filename = f"D:\PythonPrograms\HandyManApp\Flutter\Backend\images/{img}"
+    filename = f"images/{img}"
     return send_file(filename, mimetype='image/gif')
     
 @app.route('/account',methods=["POST"])
